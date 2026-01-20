@@ -105,7 +105,7 @@ document.addEventListener("DOMContentLoaded", () => {
         activitySelect.appendChild(option);
       });
 
-      // Add event listeners to delete buttons (using event delegation for better performance)
+      // Add event listeners to delete buttons (scoped to activitiesList for efficiency)
       activitiesList.querySelectorAll('.delete-btn').forEach(button => {
         button.addEventListener('click', handleDeleteParticipant);
       });
