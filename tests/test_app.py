@@ -183,6 +183,31 @@ class TestActivityCapacity:
             assert "max_participants" in activity_data
             assert isinstance(activity_data["max_participants"], int)
             assert activity_data["max_participants"] > 0
+    
+    def test_signup_fails_when_activity_is_full(self, client):
+        """Test that signup fails when activity reaches max capacity"""
+        # Basketball Team has max_participants=15 and 1 existing participant
+        activity = "Basketball Team"
+        
+        # Get current state
+        response = client.get("/activities")
+        data = response.json()
+        max_participants = data[activity]["max_participants"]
+        current_count = len(data[activity]["participants"])
+        spots_available = max_participants - current_count
+        
+        # Fill up the remaining spots
+        for i in range(spots_available):
+            email = f"student{i}@mergington.edu"
+            response = client.post(f"/activities/{activity}/signup?email={email}")
+            assert response.status_code == 200
+        
+        # Try to add one more participant (should fail)
+        response = client.post(f"/activities/{activity}/signup?email=overflow@mergington.edu")
+        assert response.status_code == 400
+        data = response.json()
+        assert "full" in data["detail"].lower()
+
 
 
 class TestIntegrationScenarios:
